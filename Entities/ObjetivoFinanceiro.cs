@@ -9,6 +9,7 @@ namespace PoupaDev.API.Entities
 {
     public class ObjetivoFinanceiro
     {
+        private const decimal RENDIMENTO = 0.03m;
         public ObjetivoFinanceiro(string? titulo, string? descricao, decimal? valorObjetivo)
         {
             Titulo = titulo;
@@ -41,6 +42,16 @@ namespace PoupaDev.API.Entities
             var totalSaque = Operacoes.Where(o => o.Tipo == TipoOperacao.Saque).Sum(s => s.Valor);
 
             return totalDeposito - totalSaque;
+        }
+
+        public void Render() {
+            var valorRendimento = Saldo * RENDIMENTO;
+
+            Console.WriteLine($"Saldo {Saldo}, Rendimento: {valorRendimento}");
+
+            var deposito = new Operacao(valorRendimento, TipoOperacao.Deposito, Id);
+
+            Operacoes.Add(deposito);
         }
     }
 }
