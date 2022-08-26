@@ -21,6 +21,18 @@ namespace PoupaDev.API.Entities
             Operacoes = new List<Operacao>();
         }
 
+        // Dapper requer um construtor sem parâmetro ou um que tenha as propriedades a serem retornadas na consulta
+        private ObjetivoFinanceiro(int id, string? titulo, string? descricao, decimal? valorObjetivo, DateTime dataCriacao)
+        {
+            Id = id;
+            Titulo = titulo;
+            Descricao = descricao;
+            ValorObjetivo = valorObjetivo;
+            DataCriacao = dataCriacao;
+
+            Operacoes = new List<Operacao>();
+        }
+
         public int Id { get; private set; }
         public string? Titulo { get; private set; }
         public string? Descricao { get; private set; }

@@ -1,4 +1,6 @@
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PoupaDev.API.Entities;
 using PoupaDev.API.InputModels;
@@ -11,15 +13,21 @@ namespace PoupaDev.API.Controllers
     public class ObjetivosFinanceirosController : ControllerBase
     {
         private readonly PoupaDevDbContext _context;
-        public ObjetivosFinanceirosController(PoupaDevDbContext context)
+        private readonly string _connectionString;
+        public ObjetivosFinanceirosController(PoupaDevDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _connectionString = configuration.GetConnectionString("PoupaDevCs");
         }
-        [HttpGet]
-        public IActionResult GetTodos() {
-            var objetivos = _context.Objetivos;
 
-            return Ok(objetivos);
+        [HttpGet]
+        public async Task<IActionResult> GetTodos() {
+            using (var sqlConnection = new SqlConnection(_connectionString)) {
+                const string sql = "SELECT * FROM Objetivos";
+                var objetivos = await sqlConnection.QueryAsync<ObjetivoFinanceiro>(sql);
+
+                return Ok(objetivos);
+            }
         }
 
         [HttpGet("{id}")]
@@ -36,15 +44,23 @@ namespace PoupaDev.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(ObjetivoFinanceiroInputModel model) {
+        public async Task<IActionResult> Post(ObjetivoFinanceiroInputModel model) {
             var objetivo = new ObjetivoFinanceiro(model.Titulo, model.Descricao,model.ValorObjetivo);
 
-            _context.Objetivos.Add(objetivo);
-            _context.SaveChanges();
-            
-            var id = objetivo.Id;
+            var parameters = new {
+                Titulo = objetivo.Titulo,
+                Descricao = objetivo.Descricao,
+                ValorObjetivo = objetivo.ValorObjetivo,
+                DataCriacao = objetivo.DataCriacao
+            };
 
-            return CreatedAtAction("GetPorId", new { id }, model);
+            using (var sqlConnection = new SqlConnection(_connectionString)) {
+                const string sql = @"INSERT INTO Objetivos OUTPUT INSERTED.Id VALUES (@Titulo, @Descricao, @ValorObjetivo, @DataCriacao)";
+
+                var id = await sqlConnection.ExecuteScalarAsync<int>(sql, parameters);
+
+                return CreatedAtAction("GetPorId", new { id }, model);
+            }
         }
 
         [HttpPost("{id}/operacoes")]

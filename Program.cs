@@ -10,7 +10,7 @@ var connectionString = builder.Configuration.GetConnectionString("PoupaDevCs");
 
 builder.Services.AddDbContext<PoupaDevDbContext>(o => o.UseSqlServer(connectionString));
 
-builder.Services.AddHostedService<RendimentoAutomaticoJob>();
+// builder.Services.AddHostedService<RendimentoAutomaticoJob>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
