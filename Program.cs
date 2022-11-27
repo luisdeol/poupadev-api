@@ -19,6 +19,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+using (var serviceScope = app.Services.CreateScope())
+{
+    var dbContext = serviceScope.ServiceProvider.GetService<PoupaDevDbContext>();
+    dbContext.Database.EnsureCreated();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
